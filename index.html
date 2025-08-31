@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Diet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fe;
+        }
+        .modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); animation: fadeIn 0.3s ease; }
+        .modal-content { background-color: #ffffff; margin: 5vh auto; padding: 1.5rem; border: 1px solid #e2e8f0; width: 95%; max-width: 600px; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); animation: slideIn 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
+        .recording { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .tutorial-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .btn-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* Loading Animation */
+        #loader-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background-color: #f8f9fe; z-index: 100; transition: opacity 0.3s ease; }
+        .loader { width: 48px; height: 48px; border-radius: 50%; display: inline-block; position: relative; border: 3px solid; border-color: #CBD5E1 #CBD5E1 transparent transparent; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        .loader::after, .loader::before { content: ''; box-sizing: border-box; position: absolute; left: 0; right: 0; top: 0; bottom: 0; margin: auto; border: 3px solid; border-color: transparent transparent #4F46E5 #4F46E5; width: 40px; height: 40px; border-radius: 50%; animation: rotationBack 0.5s linear infinite; transform-origin: center center; }
+        .loader::before { width: 32px; height: 32px; border-color: #CBD5E1 #CBD5E1 transparent transparent; animation: rotation 1.5s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes rotationBack { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+        
+        /* --- Dark Mode Styles --- */
+        *:not(.loader, .loader::after, .loader::before) {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        html.dark body { background-color: #111827; }
+        html.dark .modal-content, html.dark .bg-white { background-color: #1f2937; }
+        html.dark #loader-container { background-color: #111827; }
+        html.dark .text-gray-800, html.dark .text-gray-700 { color: #e5e7eb; }
+        html.dark .text-gray-600 { color: #9ca3af; }
+        html.dark .text-gray-500 { color: #a1a1aa; }
+        html.dark .text-gray-400 { color: #d1d5db; }
+        html.dark .border, html.dark .border-gray-200, html.dark .border-gray-300 { border-color: #4b5563; }
+        html.dark .bg-gray-50 { background-color: #374151; }
+        html.dark .bg-gray-100 { background-color: #374151; }
+        html.dark .bg-gray-200 { background-color: #4b5563; }
+        html.dark .bg-indigo-100 { background-color: #3730a3; }
+        html.dark .text-indigo-800 { color: #c7d2fe; }
+        html.dark input, html.dark select { background-color: #374151; color: #e5e7eb; border-color: #4b5563; }
+        html.dark input::placeholder { color: #9ca3af; }
+        html.dark option { background-color: #374151; color: #e5e7eb; }
+        html.dark #close-camera-btn { background-color: #374151; color: #e5e7eb;}
+        html.dark .hover\:bg-gray-200:hover { background-color: #4b5563; }
+        html.dark .hover\:bg-gray-300:hover { background-color: #6b7280; }
+        html.dark .hover\:text-gray-800:hover { color: #fff; }
+        html.dark .bg-green-100 { background-color: #042f1c; }
+        html.dark .text-green-700 { color: #6ee7b7; }
+        html.dark .hover\:bg-green-200:hover { background-color: #064e3b; }
+        html.dark .bg-red-100 { background-color: #450a0a; }
+        html.dark .text-red-700 { color: #fca5a5; }
+        html.dark .hover\:bg-red-200:hover { background-color: #7f1d1d; }
+        html.dark .btn-hover:hover { box-shadow: 0 4px 12px rgba(255,255,255,0.08); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader-container">
+        <span class="loader"></span>
+    </div>
+
+    <div id="login-screen" class="min-h-screen flex flex-col justify-center items-center text-center p-4 hidden">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-2 text-gray-800">Welcome to AI Diet</h1>
+        <p class="text-lg text-gray-600 mb-8">Your personal AI-powered calorie tracker.</p>
+        <button id="login-btn" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-indigo-700 flex items-center btn-hover">
+            <svg class="w-6 h-6 mr-3" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.021 35.596 44 30.138 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>
+            Sign in with Google
+        </button>
+    </div>
+
+    <div id="app-container" class="w-full mx-auto max-w-3xl flex flex-col p-4 hidden">
+        <header class="text-center py-4 shrink-0 relative">
+             <button id="open-help-btn" class="absolute top-4 left-4 p-2 text-gray-500 hover:text-gray-800 btn-hover rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+            <button id="theme-toggle-btn" class="absolute top-4 left-16 p-2 text-gray-500 hover:text-gray-800 btn-hover rounded-full">
+                <svg id="theme-toggle-dark-icon" class="h-6 w-6 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="h-6 w-6 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05A1 1 0 003.636 3.636l-.707.707a1 1 0 101.414 1.414l.707-.707zM3 11a1 1 0 100-2H2a1 1 0 100 2h1zM13.636 13.636a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            </button>
+            <div class="flex items-center justify-center">
+                 <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800">AI Diet</h1>
+                 <button id="logout-btn" class="ml-4 text-sm text-red-500 hover:underline">(Logout)</button>
+            </div>
+            <p class="text-lg text-gray-600" id="welcome-message">Welcome!</p>
+            <button id="open-settings-btn" class="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-800 btn-hover rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </button>
+        </header>
+
+        <main class="flex-1 flex flex-col min-h-0 space-y-8">
+             <section class="text-center shrink-0">
+                <div class="bg-white inline-block p-4 sm:p-6 rounded-2xl shadow-lg">
+                    <p class="text-base sm:text-lg font-medium text-gray-600">Net Calories Today</p>
+                    <div class="text-5xl sm:text-6xl font-extrabold text-indigo-600" id="current-calories">0</div>
+                    <div class="mt-2 text-sm text-gray-500 grid grid-cols-2 gap-4">
+                        <div>Consumed: <strong id="calories-consumed" class="text-green-600">0</strong></div>
+                        <div>Burnt: <strong id="calories-burnt" class="text-red-600">0</strong></div>
+                    </div>
+                    <p class="mt-2 text-xs text-gray-400">Target: <span id="target-display">N/A</span></p>
+                </div>
+                <div class="mt-4 flex flex-col sm:flex-row justify-center items-center gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="reset-consumed-input" value="0" class="w-20 p-1 border rounded-md text-center">
+                        <button id="reset-consumed-btn" class="bg-green-100 text-green-700 px-3 py-1 rounded-md hover:bg-green-200 btn-hover">Reset Consumed</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="reset-burnt-input" value="0" class="w-20 p-1 border rounded-md text-center">
+                        <button id="reset-burnt-btn" class="bg-red-100 text-red-700 px-3 py-1 rounded-md hover:bg-red-200 btn-hover">Reset Burnt</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="chat-interface" class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg flex-1 flex flex-col min-h-0">
+                <div id="chat-box" class="flex-1 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200 min-h-0">
+                    <div class="text-gray-500 text-center flex items-center justify-center h-full">Log your meal or exercise.</div>
+                </div>
+                <div id="image-preview-container" class="mb-2 flex flex-wrap gap-2"></div>
+                
+                <div class="flex items-center space-x-2 relative shrink-0">
+                    <div id="action-popup" class="absolute bottom-14 left-0 mb-2 w-full flex justify-center space-x-2 transition-all transform opacity-0 -translate-y-2 pointer-events-none">
+                        <button id="camera-btn" class="bg-white p-3 text-gray-600 hover:bg-gray-200 rounded-full shadow-md btn-hover">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        </button>
+                        <label for="image-upload" class="cursor-pointer bg-white p-3 text-gray-600 hover:bg-gray-200 rounded-full shadow-md btn-hover">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </label>
+                        <button id="voice-btn" class="bg-white text-gray-600 p-3 hover:bg-gray-200 rounded-full shadow-md btn-hover">
+                             <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                        </button>
+                    </div>
+                    <input type="file" id="image-upload" class="hidden" accept="image/*" multiple>
+
+                    <button id="add-btn" class="bg-gray-200 p-3 text-gray-600 hover:bg-gray-300 rounded-full btn-hover">
+                        <svg id="add-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    </button>
+                    <input type="text" id="user-input" class="flex-1 p-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition min-w-0" placeholder="Log food or exercise...">
+                    <button id="send-btn" class="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 btn-hover">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                    </button>
+                </div>
+            </section>
+        </main>
+        <footer class="text-center py-4 text-gray-500 text-sm shrink-0"><p>Powered by Muzahir Abbas.</p></footer>
+    </div>
+    
+    <div id="settings-modal" class="modal">
+         </div>
+
+    <div id="help-modal" class="modal">
+        </div>
+    
+    <div id="camera-modal" class="modal">
+        <div class="modal-content">
+            <video id="camera-view" autoplay playsinline class="w-full rounded-lg"></video>
+            <canvas id="camera-canvas" class="hidden"></canvas>
+            <div class="mt-4 flex justify-center">
+                <button id="capture-btn" class="bg-indigo-600 text-white py-3 px-6 rounded-full font-bold btn-hover">Capture</button>
+            </div>
+             <button id="close-camera-btn" class="absolute top-2 right-2 bg-white rounded-full p-1">&times;</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+       const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID"
+};
+
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const loginScreen = document.getElementById('login-screen');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const appContainer = document.getElementById('app-container');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const currentCaloriesDisplay = document.getElementById('current-calories');
+        const caloriesConsumedDisplay = document.getElementById('calories-consumed');
+        const caloriesBurntDisplay = document.getElementById('calories-burnt');
+        const targetDisplay = document.getElementById('target-display');
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const voiceBtn = document.getElementById('voice-btn');
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const cameraBtn = document.getElementById('camera-btn');
+        const cameraModal = document.getElementById('camera-modal');
+        const cameraView = document.getElementById('camera-view');
+        const cameraCanvas = document.getElementById('camera-canvas');
+        const captureBtn = document.getElementById('capture-btn');
+        const closeCameraBtn = document.getElementById('close-camera-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const openSettingsBtn = document.getElementById('open-settings-btn');
+        const helpModal = document.getElementById('help-modal');
+        const openHelpBtn = document.getElementById('open-help-btn');
+        const loaderContainer = document.getElementById('loader-container');
+        const addBtn = document.getElementById('add-btn');
+        const addIcon = document.getElementById('add-icon');
+        const actionPopup = document.getElementById('action-popup');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // --- Theme Toggling ---
+        function setTheme(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                themeToggleDarkIcon.classList.add('hidden');
+                themeToggleLightIcon.classList.remove('hidden');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleDarkIcon.classList.remove('hidden');
+                themeToggleLightIcon.classList.add('hidden');
+                localStorage.setItem('color-theme', 'light');
+            }
+        }
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('color-theme');
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            setTheme(true);
+        } else {
+            setTheme(false);
+        }
+        themeToggleBtn.addEventListener('click', () => {
+            const isCurrentlyDark = document.documentElement.classList.contains('dark');
+            setTheme(!isCurrentlyDark);
+        });
+        
+        // --- App State ---
+        let user = null;
+        let userSettings = {};
+        let totalConsumed = 0;
+        let totalBurnt = 0;
+        let conversationHistory = [];
+        let attachedImagesBase64 = [];
+        let isRecording = false;
+        let cameraStream;
+
+        // --- Authentication ---
+        loginBtn.addEventListener('click', () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider).catch(error => {
+                console.error("Authentication error:", error);
+                alert("Could not sign in. Please try again.");
+            });
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        onAuthStateChanged(auth, async (currentUser) => {
+            if (currentUser) {
+                user = currentUser;
+                loginScreen.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                loaderContainer.style.display = 'none';
+                welcomeMessage.textContent = `Welcome, ${user.displayName.split(' ')[0]}!`;
+                await loadAndInitializeUserData();
+            } else {
+                user = null;
+                loginScreen.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+                loaderContainer.style.display = 'none';
+            }
+        });
+
+        // --- Settings & Data ---
+        async function loadAndInitializeUserData() {
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                userSettings = docSnap.data();
+                // Daily Reset Logic
+                const today = new Date().toLocaleDateString();
+                if (userSettings.lastDate !== today) {
+                    userSettings.consumedToday = 0;
+                    userSettings.burntToday = 0;
+                    userSettings.lastDate = today;
+                    await updateDoc(docRef, {
+                        consumedToday: 0,
+                        burntToday: 0,
+                        lastDate: today
+                    });
+                }
+                totalConsumed = userSettings.consumedToday || 0;
+                totalBurnt = userSettings.burntToday || 0;
+            } else {
+                // First time user, open settings to prompt for initial setup
+                openSettingsBtn.click();
+            }
+            startApp();
+        }
+
+        function renderSettingsModal() {
+            settingsModal.innerHTML = `
+                <div class="modal-content">
+                    <h2 class="text-2xl font-semibold mb-4">Settings</h2>
+                    <div class="p-4 border rounded-lg bg-gray-50 mb-6">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-800">Calorie Needs Calculator</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div><label for="calc-age" class="block text-sm font-medium">Age</label><input type="number" id="calc-age" class="mt-1 w-full p-2 border rounded" placeholder="e.g., 30" value="${userSettings.age || ''}"></div>
+                            <div><label for="calc-gender" class="block text-sm font-medium">Gender</label><select id="calc-gender" class="mt-1 w-full p-2 border rounded bg-white"><option value="male">Male</option><option value="female">Female</option></select></div>
+                            <div><label for="calc-weight" class="block text-sm font-medium">Weight</label><div class="flex"><input type="number" id="calc-weight" class="mt-1 w-full p-2 border-l border-t border-b rounded-l" placeholder="e.g., 70" value="${userSettings.weightKg ? (userSettings.weightKg * 2.20462).toFixed(1) : ''}"><select id="calc-weight-unit" class="mt-1 border-r border-t border-b rounded-r bg-gray-100 p-2"><option value="lbs">lbs</option><option value="kg">kg</option></select></div></div>
+                            <div><label for="calc-height-cm" class="block text-sm font-medium">Height</label><div class="flex"><input type="number" id="calc-height-cm" class="mt-1 w-full p-2 border-l border-t border-b rounded-l" placeholder="e.g., 175" value="${userSettings.heightCm || ''}"><select id="calc-height-unit" class="mt-1 border-r border-t border-b rounded-r bg-gray-100 p-2"><option value="cm">cm</option><option value="ft">ft/in</option></select></div><div id="height-ft-in-container" class="flex gap-2 mt-1 hidden"><input type="number" id="calc-height-ft" class="w-1/2 p-2 border rounded" placeholder="ft"><input type="number" id="calc-height-in" class="w-1/2 p-2 border rounded" placeholder="in"></div></div>
+                        </div>
+                        <div class="mt-4"><label for="calc-deficit" class="block text-sm font-medium">Calorie Deficit</label><input type="number" id="calc-deficit" class="mt-1 w-full p-2 border rounded" placeholder="e.g., 500" value="${userSettings.calorieDeficit || ''}"></div>
+                        <button id="calculate-btn" class="w-full bg-blue-500 text-white py-2 rounded mt-4 hover:bg-blue-600 btn-hover">Calculate My Needs</button>
+                        <div id="calc-results" class="mt-3 text-center hidden"><p class="text-sm">Maintenance: <strong id="maintenance-calories">0</strong> kcal/day</p><p class="text-lg font-bold">Target: <strong id="target-calories">0</strong> kcal/day</p><button id="apply-target-btn" class="text-sm text-blue-600 hover:underline">Apply This Target</button></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div><label for="setting-calorie-target" class="block text-sm font-medium">Daily Calorie Target (Manual)</label><input type="number" id="setting-calorie-target" class="mt-1 w-full p-2 border rounded"></div>
+                        <div><label for="setting-gemini-key" class="block text-sm font-medium">Your Gemini API Key</label><input type="password" id="setting-gemini-key" class="mt-1 w-full p-2 border rounded"></div>
+                    </div>
+                    <div class="mt-6 border-t pt-4">
+                        <h3 class="text-lg font-semibold mb-2">How to Get Your API Key</h3>
+                        <div class="space-y-2">
+                            <div class="tutorial-item"><button class="tutorial-toggle w-full text-left font-semibold p-2 bg-gray-100 rounded">How to get your Gemini API Key ▼</button><div class="tutorial-details p-2 bg-gray-50 rounded-b"><ol class="list-decimal list-inside text-sm space-y-1"><li>Go to <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 hover:underline">Google AI Studio</a>.</li><li>On the left menu, click <strong>"Get API key"</strong> &gt; <strong>"Create API key"</strong>.</li><li>Copy the key.</li></ol></div></div>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button id="close-settings-btn" class="bg-gray-200 py-2 px-4 rounded mr-2 btn-hover">Close</button>
+                        <button id="save-settings-btn" class="bg-indigo-600 text-white py-2 px-4 rounded btn-hover">Save</button>
+                    </div>
+                </div>`;
+            
+            document.getElementById('close-settings-btn').addEventListener('click', () => settingsModal.style.display = 'none');
+            document.getElementById('save-settings-btn').addEventListener('click', saveUserSettings);
+            setupTutorialToggles();
+            setupCalculator();
+            
+            // Pre-fill gender from settings
+            if(userSettings.gender) document.getElementById('calc-gender').value = userSettings.gender;
+
+            document.getElementById('setting-gemini-key').value = userSettings.geminiApiKey || '';
+            document.getElementById('setting-calorie-target').value = userSettings.dailyCalorieTarget || '';
+        }
+
+        async function saveUserSettings() {
+            // Calculate height in cm regardless of input method
+            let heightCm;
+            if (document.getElementById('calc-height-unit').value === 'cm') {
+                heightCm = parseFloat(document.getElementById('calc-height-cm').value);
+            } else {
+                const ft = parseFloat(document.getElementById('calc-height-ft').value) || 0;
+                const inches = parseFloat(document.getElementById('calc-height-in').value) || 0;
+                heightCm = (ft * 30.48) + (inches * 2.54);
+            }
+
+            // Calculate weight in kg regardless of input method
+             let weightKg;
+            if (document.getElementById('calc-weight-unit').value === 'kg') {
+                weightKg = parseFloat(document.getElementById('calc-weight').value);
+            } else {
+                weightKg = (parseFloat(document.getElementById('calc-weight').value) || 0) * 0.453592;
+            }
+
+            const newSettings = {
+                geminiApiKey: document.getElementById('setting-gemini-key').value.trim(),
+                dailyCalorieTarget: parseInt(document.getElementById('setting-calorie-target').value, 10),
+                age: parseInt(document.getElementById('calc-age').value, 10),
+                gender: document.getElementById('calc-gender').value,
+                weightKg: weightKg,
+                heightCm: heightCm,
+                calorieDeficit: parseInt(document.getElementById('calc-deficit').value, 10) || 0,
+                // Initialize daily tracking if it's the first save
+                consumedToday: userSettings.consumedToday || 0,
+                burntToday: userSettings.burntToday || 0,
+                lastDate: userSettings.lastDate || new Date().toLocaleDateString()
+            };
+
+            if (!newSettings.geminiApiKey || !newSettings.dailyCalorieTarget) {
+                alert('Gemini API key and the calorie target are required.'); return;
+            }
+
+            try {
+                const docRef = doc(db, "users", user.uid);
+                await setDoc(docRef, newSettings, { merge: true });
+                userSettings = newSettings;
+                settingsModal.style.display = 'none';
+                updateDisplay();
+                alert('Settings saved to your account!');
+            } catch (error) {
+                console.error("Error saving settings:", error);
+                alert("Could not save settings. Please try again.");
+            }
+        }
+
+        openSettingsBtn.addEventListener('click', () => {
+            renderSettingsModal();
+            settingsModal.style.display = 'block';
+        });
+        
+        openHelpBtn.addEventListener('click', () => {
+            renderHelpModal();
+            helpModal.style.display = 'block';
+        });
+
+        function renderHelpModal() {
+            helpModal.innerHTML = `
+                <div class="modal-content">
+                    <h2 class="text-2xl font-semibold mb-4">How to Use AI Diet</h2>
+                    <div class="space-y-4 text-gray-700">
+                        <div>
+                            <h3 class="font-semibold text-lg">📊 The Dashboard</h3>
+                            <p>The main screen shows your <strong>Net Calories</strong> for the day. This is calculated by subtracting the calories you've <strong>Burnt</strong> from the calories you've <strong>Consumed</strong>. Your goal is to stay near your daily target!</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg">💬 Logging Food & Exercise</h3>
+                            <p>Use the chat box at the bottom to log your activities. The AI is smart enough to tell the difference between food and exercise.</p>
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>To log food:</strong> Type something like <span class="bg-gray-100 p-1 rounded-sm">"ate a plate of biryani"</span> or <span class="bg-gray-100 p-1 rounded-sm">"had a glass of mango lassi"</span>.</li>
+                                <li><strong>To log exercise:</strong> Type something like <span class="bg-gray-100 p-1 rounded-sm">"walked for 30 minutes"</span> or <span class="bg-gray-100 p-1 rounded-sm">"did a 1-hour gym workout"</span>.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg">📸 Adding Images & Voice</h3>
+                             <p>Click the <strong>+</strong> button to open the attachment menu:</p>
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Camera (📷):</strong> Take a photo of your meal for a more accurate analysis.</li>
+                                <li><strong>Image (🖼️):</strong> Upload a photo of your food from your device's gallery. You can add multiple images.</li>
+                                <li><strong>Voice (🎤):</strong> Tap the microphone to speak your log instead of typing.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg">🔄 Manual Adjustments</h3>
+                            <p>Made a mistake? Use the "Reset Consumed" or "Reset Burnt" controls below the main calorie display to manually enter a new total for the day.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg">⚙️ Settings</h3>
+                            <p>Click the gear icon in the top right to access settings. Here you can use the <strong>Calorie Needs Calculator</strong> to find your ideal daily target and add your personal <strong>Gemini API Key</strong>, which is required for the AI to work.</p>
+                        </div>
+                    </div>
+                     <div class="mt-6 flex justify-end">
+                        <button id="close-help-btn" class="bg-indigo-600 text-white py-2 px-4 rounded btn-hover">Got it!</button>
+                    </div>
+                </div>`;
+            document.getElementById('close-help-btn').addEventListener('click', () => helpModal.style.display = 'none');
+        }
+
+        function setupTutorialToggles() {
+            document.querySelectorAll('.tutorial-toggle').forEach(button => {
+                button.addEventListener('click', () => {
+                    const details = button.nextElementSibling;
+                    if (details.style.maxHeight) {
+                        details.style.maxHeight = null;
+                        button.textContent = button.textContent.replace('▲', '▼');
+                    } else {
+                        details.style.maxHeight = details.scrollHeight + "px";
+                        button.textContent = button.textContent.replace('▼', '▲');
+                    }
+                });
+            });
+        }
+
+        function setupCalculator() {
+            const calcHeightUnit = document.getElementById('calc-height-unit');
+            const calcHeightCm = document.getElementById('calc-height-cm');
+            const heightFtInContainer = document.getElementById('height-ft-in-container');
+
+            calcHeightUnit.addEventListener('change', () => {
+                if (calcHeightUnit.value === 'ft') {
+                    calcHeightCm.classList.add('hidden');
+                    heightFtInContainer.classList.remove('hidden');
+                } else {
+                    calcHeightCm.classList.remove('hidden');
+                    heightFtInContainer.classList.add('hidden');
+                }
+            });
+
+            document.getElementById('calculate-btn').addEventListener('click', () => {
+                const age = parseInt(document.getElementById('calc-age').value);
+                let weight = parseFloat(document.getElementById('calc-weight').value);
+                let height;
+                const deficit = parseInt(document.getElementById('calc-deficit').value) || 0;
+
+                if (document.getElementById('calc-weight-unit').value === 'lbs') {
+                    weight = weight * 0.453592;
+                }
+
+                if (calcHeightUnit.value === 'cm') {
+                    height = parseFloat(calcHeightCm.value);
+                } else {
+                    const ft = parseFloat(document.getElementById('calc-height-ft').value) || 0;
+                    const inches = parseFloat(document.getElementById('calc-height-in').value) || 0;
+                    height = (ft * 30.48) + (inches * 2.54);
+                }
+
+                if (!age || !weight || !height) { alert('Please fill in all calculator fields.'); return; }
+
+                const bmr = (document.getElementById('calc-gender').value === 'male') 
+                    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+                    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+                
+                const maintenance = Math.round(bmr * 1.2);
+                const target = maintenance - deficit;
+
+                document.getElementById('maintenance-calories').textContent = maintenance;
+                document.getElementById('target-calories').textContent = target;
+                document.getElementById('calc-results').classList.remove('hidden');
+            });
+            
+            document.getElementById('apply-target-btn').addEventListener('click', () => {
+                document.getElementById('setting-calorie-target').value = document.getElementById('target-calories').textContent;
+            });
+        }
+
+        async function updateCaloriesInFirestore(consumed, burnt) {
+            const docRef = doc(db, "users", user.uid);
+            const today = new Date().toLocaleDateString();
+            await updateDoc(docRef, {
+                consumedToday: consumed,
+                burntToday: burnt,
+                lastDate: today
+            });
+            // Also update local state for immediate feedback
+            totalConsumed = consumed;
+            totalBurnt = burnt;
+            updateDisplay();
+        }
+
+        // --- Main App Logic ---
+        function startApp() {
+            updateDisplay();
+            setupManualReset();
+        }
+
+        function updateDisplay() {
+            const netCalories = totalConsumed - totalBurnt;
+            currentCaloriesDisplay.textContent = netCalories;
+            caloriesConsumedDisplay.textContent = totalConsumed;
+            caloriesBurntDisplay.textContent = totalBurnt;
+            targetDisplay.textContent = userSettings.dailyCalorieTarget || 'N/A';
+        }
+
+        function setupManualReset() {
+            const resetConsumedBtn = document.getElementById('reset-consumed-btn');
+            const resetConsumedInput = document.getElementById('reset-consumed-input');
+            const resetBurntBtn = document.getElementById('reset-burnt-btn');
+            const resetBurntInput = document.getElementById('reset-burnt-input');
+
+            resetConsumedBtn.addEventListener('click', async () => {
+                const newValue = parseInt(resetConsumedInput.value, 10);
+                if(isNaN(newValue)) return;
+                await updateCaloriesInFirestore(newValue, totalBurnt);
+                alert(`Consumed calories reset to ${newValue}.`);
+            });
+
+            resetBurntBtn.addEventListener('click', async () => {
+                const newValue = parseInt(resetBurntInput.value, 10);
+                if(isNaN(newValue)) return;
+                await updateCaloriesInFirestore(totalConsumed, newValue);
+                alert(`Burnt calories reset to ${newValue}.`);
+            });
+        }
+
+        function addMessageToChat(sender, message) {
+            if (chatBox.children.length === 1 && chatBox.children[0].classList.contains('text-gray-500')) chatBox.innerHTML = '';
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('mb-2', 'p-3', 'rounded-lg', 'max-w-xs', 'sm:max-w-md', 'break-words');
+            if (sender === 'user') {
+                messageElement.classList.add('bg-indigo-100', 'text-indigo-800', 'ml-auto');
+                messageElement.textContent = message;
+            } else {
+                messageElement.classList.add('bg-gray-200', 'text-gray-800', 'mr-auto');
+                messageElement.innerHTML = message;
+            }
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        addBtn.addEventListener('click', () => {
+            actionPopup.classList.toggle('opacity-0');
+            actionPopup.classList.toggle('-translate-y-2');
+            actionPopup.classList.toggle('pointer-events-none');
+            addIcon.classList.toggle('rotate-45');
+        });
+
+        imageUpload.addEventListener('change', (event) => {
+            for (const file of event.target.files) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    attachedImagesBase64.push(reader.result);
+                    renderImagePreviews();
+                };
+                reader.readAsDataURL(file);
+            }
+            imageUpload.value = '';
+        });
+
+        function renderImagePreviews() {
+            imagePreviewContainer.innerHTML = '';
+            attachedImagesBase64.forEach((base64, index) => {
+                const previewWrapper = document.createElement('div');
+                previewWrapper.className = 'relative';
+                const img = document.createElement('img');
+                img.src = base64;
+                img.className = 'h-20 w-20 rounded-lg object-cover';
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '&times;';
+                removeBtn.className = 'absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs';
+                removeBtn.onclick = () => {
+                    attachedImagesBase64.splice(index, 1);
+                    renderImagePreviews();
+                };
+                previewWrapper.appendChild(img);
+                previewWrapper.appendChild(removeBtn);
+                imagePreviewContainer.appendChild(previewWrapper);
+            });
+        }
+
+        cameraBtn.addEventListener('click', async () => {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                cameraView.srcObject = cameraStream;
+                cameraModal.style.display = 'block';
+            } catch (err) {
+                alert("Could not access camera. Please ensure you have a camera and have granted permission.");
+            }
+        });
+
+        function closeCamera() {
+            if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+            cameraModal.style.display = 'none';
+        }
+        closeCameraBtn.addEventListener('click', closeCamera);
+
+        captureBtn.addEventListener('click', () => {
+            cameraCanvas.width = cameraView.videoWidth;
+            cameraCanvas.height = cameraView.videoHeight;
+            cameraCanvas.getContext('2d').drawImage(cameraView, 0, 0);
+            attachedImagesBase64.push(cameraCanvas.toDataURL('image/jpeg'));
+            renderImagePreviews();
+            closeCamera();
+        });
+
+        sendBtn.addEventListener('click', handleUserInput);
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleUserInput(); });
+
+        async function handleUserInput() {
+            const text = userInput.value.trim();
+            if (!text && attachedImagesBase64.length === 0) return;
+            addMessageToChat('user', text || `(${attachedImagesBase64.length} image(s) attached)`);
+            userInput.value = '';
+            const imagesToSend = [...attachedImagesBase64];
+            attachedImagesBase64 = [];
+            renderImagePreviews();
+            addMessageToChat('bot', '<i>Analyzing...</i>');
+            const botThinkingMessage = chatBox.lastElementChild;
+
+            try {
+                const response = await getCalorieEstimation(text, imagesToSend);
+                const { total_calories, explanation } = response;
+                
+                let newConsumed = totalConsumed;
+                let newBurnt = totalBurnt;
+
+                if (total_calories > 0) {
+                    newConsumed += total_calories;
+                } else {
+                    newBurnt += Math.abs(total_calories);
+                }
+                
+                await updateCaloriesInFirestore(newConsumed, newBurnt);
+
+                const actionText = total_calories >= 0 ? `Added <b>${total_calories} calories</b>` : `Subtracted <b>${-total_calories} calories</b>`;
+                botThinkingMessage.innerHTML = `${actionText}. <br><br> <i>Explanation: ${explanation}</i>`;
+                
+            } catch (error) {
+                console.error("Gemini API error:", error);
+                botThinkingMessage.textContent = `Sorry, an error occurred. Check your Gemini API key in Settings. (${error.message})`;
+            }
+        }
+        
+        async function getCalorieEstimation(text, imagesBase64) {
+            if (!userSettings.geminiApiKey) throw new Error("Your Gemini API Key is not set in Settings.");
+            
+            const userParts = [];
+            if (text) userParts.push({ text: text });
+            imagesBase64.forEach(base64 => {
+                userParts.push({ inline_data: { mime_type: base64.match(/:(.*?);/)[1], data: base64.split(',')[1] } });
+            });
+
+            conversationHistory.push({ role: 'user', parts: userParts });
+
+            const systemPrompt = `You are an expert nutritionist and fitness coach for Pakistani cuisine. Your task is to analyze the user's input to determine if they are logging food they ate or an exercise they performed.
+            - If the input is about FOOD, estimate the calories and return a POSITIVE number for "total_calories".
+            - If the input is about EXERCISE, estimate the calories burned and return a NEGATIVE number for "total_calories".
+            - Use the user's weight of ${userSettings.weightKg || 70} kg for more accurate exercise calculations.
+            - You MUST respond in a valid JSON format only, with no other text.
+            - Example (Food): {"total_calories": 450, "explanation": "One plate of chicken biryani is about 450 calories."}
+            - Example (Exercise): {"total_calories": -250, "explanation": "A 30-minute brisk walk for a 70kg person burns approximately 250 calories."}
+            - If you cannot determine the calories, return 0.`;
+            
+            const requestBody = {
+                contents: conversationHistory,
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { responseMimeType: "application/json" }
+            };
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userSettings.geminiApiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+            
+            const result = await response.json();
+            const botResponseText = result.candidates[0].content.parts[0].text;
+            const parsedResponse = JSON.parse(botResponseText);
+
+            conversationHistory.push({ role: 'model', parts: [{ text: botResponseText }] });
+
+            return parsedResponse;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            
+            let isRecognizing = false;
+
+            voiceBtn.addEventListener('click', () => {
+                if (isRecognizing) {
+                    recognition.stop();
+                    return;
+                }
+                try {
+                    recognition.start();
+                } catch(e) {
+                    alert("Voice recognition could not be started. Your browser might be blocking it.");
+                }
+            });
+
+            recognition.onstart = () => {
+                isRecognizing = true;
+                voiceBtn.classList.add('bg-red-500', 'recording');
+            };
+
+            recognition.onresult = (event) => {
+                userInput.value = event.results[0][0].transcript;
+            };
+
+            recognition.onerror = (event) => {
+                let errorMessage = `Voice recognition error: ${event.error}`;
+                if (event.error === 'not-allowed') {
+                    errorMessage = "Microphone access was denied. Please allow microphone access in your browser settings.";
+                } else if (event.error === 'network') {
+                    errorMessage = "A network error occurred with the voice recognition service. Please check your internet connection.";
+                } else if (event.error === 'no-speech') {
+                    errorMessage = "No speech was detected. Please try again.";
+                }
+                alert(errorMessage);
+                console.error('Speech recognition error:', event);
+            };
+
+            recognition.onend = () => {
+                isRecognizing = false;
+                voiceBtn.classList.remove('bg-red-500', 'recording');
+            };
+        } else {
+            voiceBtn.style.display = 'none';
+        }
+        
+    </script>
+</body>
+</html>
