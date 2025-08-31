@@ -1,4 +1,4 @@
-# **AI Diet 🥗 \- Your Personal AI-Powered Calorie Tracker**
+# **AI Diet 🥗 \- Your Personal AI-Powered Calorie Tracker** [Live Demo](https://calorieapptest.pages.dev/)
 
 AI Diet is a modern, single-page web application that helps you track your daily calorie intake and expenditure. Leveraging the power of Google's Gemini AI, you can log meals and exercises using text, voice, or even by taking a picture of your food. All your data is securely stored in your own Firebase project.
 
