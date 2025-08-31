@@ -42,10 +42,10 @@ Follow these steps to get your own copy of AI Diet up and running.
 ### **Step 1: Clone the Repository**
 
 First, get the code onto your local machine.
-
+ ```
 git clone \[https://github.com/YOUR\_USERNAME/YOUR\_REPOSITORY\_NAME.git\](https://github.com/YOUR\_USERNAME/YOUR\_REPOSITORY\_NAME.git)  
 cd YOUR\_REPOSITORY\_NAME
-
+ ```
 ### **Step 2: Set Up Your Firebase Project**
 
 This project uses Firebase for user authentication and data storage.
@@ -74,17 +74,17 @@ This project uses Firebase for user authentication and data storage.
    * Delete the existing rules and replace them with the following code. This ensures that users can only read and write their own data.  
    * Click **Publish**.
 
-```
-rules\_version \= '2';  
-service cloud.firestore {  
-  match /databases/{database}/documents {  
-    // Users can only read and write their own document.  
-    match /users/{userId} {  
-      allow read, write: if request.auth \!= null && request.auth.uid \== userId;  
-    }  
-  }  
-}
-```
+   ```
+      rules\_version \= '2';  
+      service cloud.firestore {  
+        match /databases/{database}/documents {  
+          // Users can only read and write their own document.  
+          match /users/{userId} {  
+            allow read, write: if request.auth \!= null && request.auth.uid \== userId;  
+          }  
+        }  
+      }
+   ```
 
 6. **Get Your Firebase Configuration**:  
    * Go to your **Project Settings** (click the gear icon ⚙️ next to "Project Overview").  
