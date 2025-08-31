@@ -74,6 +74,7 @@ This project uses Firebase for user authentication and data storage.
    * Delete the existing rules and replace them with the following code. This ensures that users can only read and write their own data.  
    * Click **Publish**.
 
+```
 rules\_version \= '2';  
 service cloud.firestore {  
   match /databases/{database}/documents {  
@@ -83,6 +84,7 @@ service cloud.firestore {
     }  
   }  
 }
+```
 
 6. **Get Your Firebase Configuration**:  
    * Go to your **Project Settings** (click the gear icon ⚙️ next to "Project Overview").  
@@ -95,7 +97,9 @@ service cloud.firestore {
 
 1. Open the index.html file in your code editor.  
 2. Find the \<script type="module"\> tag near the bottom of the file.  
-3. Locate the firebaseConfig constant. It will look like a placeholder similar to this:  
+3. Locate the firebaseConfig constant. It will look like a placeholder similar to this:
+
+   ``` 
    const firebaseConfig \= {  
        apiKey: "YOUR\_API\_KEY",  
        authDomain: "YOUR\_PROJECT\_ID.firebaseapp.com",  
@@ -105,8 +109,8 @@ service cloud.firestore {
        appId: "YOUR\_APP\_ID",  
        measurementId: "YOUR\_MEASUREMENT\_ID"  
    };
-
-4. **Replace this entire placeholder object** with the firebaseConfig object you copied from your Firebase project dashboard in the previous step. The values (like apiKey, projectId, etc.) will be unique to your project.
+   ```
+5. **Replace this entire placeholder object** with the firebaseConfig object you copied from your Firebase project dashboard in the previous step. The values (like apiKey, projectId, etc.) will be unique to your project.
 
 ### **Step 4: Get Your Google Gemini API Key**
 
