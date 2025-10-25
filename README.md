@@ -31,6 +31,7 @@ AI Diet is a modern, single-page web application that helps you track your daily
 
 ## **🚀 Getting Started: Setting Up Your Own Version**
 
+
 Follow these steps to get your own copy of AI Diet up and running.
 
 ### **Prerequisites**
